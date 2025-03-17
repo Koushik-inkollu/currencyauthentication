@@ -1,9 +1,15 @@
 
 import React from 'react';
 import { ModeToggle } from './ModeToggle';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const NavBar = () => {
+  const location = useLocation();
+  
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+  
   return (
     <header className="border-b bg-card">
       <div className="container flex h-16 items-center justify-between">
@@ -12,10 +18,24 @@ const NavBar = () => {
             AI Tools
           </Link>
           <nav className="hidden md:flex gap-6">
-            <Link to="/" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link 
+              to="/" 
+              className={`text-sm font-medium transition-colors ${
+                isActive('/') 
+                  ? 'text-primary' 
+                  : 'text-foreground/80 hover:text-primary'
+              }`}
+            >
               Keyphrase Generator
             </Link>
-            <Link to="/currency-auth" className="text-sm font-medium transition-colors hover:text-primary">
+            <Link 
+              to="/currency-auth" 
+              className={`text-sm font-medium transition-colors ${
+                isActive('/currency-auth') 
+                  ? 'text-primary' 
+                  : 'text-foreground/80 hover:text-primary'
+              }`}
+            >
               Currency Authentication
             </Link>
           </nav>

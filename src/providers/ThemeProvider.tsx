@@ -39,11 +39,10 @@ export function ThemeProvider({
         ? 'dark'
         : 'light';
       root.classList.add(systemTheme);
-      return;
+    } else {
+      // Add the current theme class
+      root.classList.add(theme);
     }
-
-    // Add the current theme class
-    root.classList.add(theme);
     
     // Save theme to localStorage
     localStorage.setItem('theme', theme);
