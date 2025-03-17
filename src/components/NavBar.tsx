@@ -15,7 +15,7 @@ const NavBar = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="text-xl font-bold">
-            AI Tools
+            CurrencyGuard
           </Link>
           <nav className="hidden md:flex gap-6">
             <Link 

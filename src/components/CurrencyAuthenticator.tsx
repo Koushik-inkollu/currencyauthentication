@@ -418,13 +418,39 @@ const CurrencyAuthenticator = () => {
             <div className="space-y-3">
               <h3 className="font-medium">Key Security Features of ₹500 Notes</h3>
               <ul className="space-y-2 list-disc pl-5">
-                <li><strong>Security Thread:</strong> Windowed security thread with inscriptions 'भारत' and 'RBI'.</li>
-                <li><strong>Watermark:</strong> Portrait of Mahatma Gandhi with multi-tonal watermark.</li>
-                <li><strong>Microlettering:</strong> 'RBI' and '500' visible under a magnifying glass.</li>
-                <li><strong>Hologram/Color-shifting Ink:</strong> The numeral ₹500 changes from green to blue when tilted.</li>
-                <li><strong>Intaglio Printing:</strong> Raised printing of Mahatma Gandhi portrait, RBI seal, etc.</li>
-                <li><strong>Identification Mark:</strong> Circle with ₹500 in raised print on the right side.</li>
-                <li><strong>Number Panels:</strong> Numbers growing from small to big on the top left and bottom right.</li>
+                <li><strong>Security Thread:</strong> Windowed security thread with inscriptions 'भारत' and 'RBI'. Look for the silver thread running vertically on the right side of the note that changes from silver to green when tilted.</li>
+                <li><strong>Watermark:</strong> Portrait of Mahatma Gandhi with multi-tonal watermark and electrotype '500' on the right side. Hold the note against light to see this feature clearly.</li>
+                <li><strong>Microlettering:</strong> 'RBI' and '500' visible under a magnifying glass. These micro-letters appear between the vertical band and Mahatma Gandhi portrait.</li>
+                <li><strong>Color-shifting Ink:</strong> The numeral ₹500 on the bottom right changes from green to blue when tilted. This is one of the hardest features to replicate in counterfeits.</li>
+                <li><strong>Portrait and See-through Register:</strong> Mahatma Gandhi portrait and electrotype watermark '500' on the right side. The portrait should have excellent sharpness and clarity.</li>
+                <li><strong>Intaglio Printing:</strong> Raised printing of Mahatma Gandhi portrait, RBI seal, Guarantee and Promise clause, Governor's signature. Run your finger over these areas to feel the raised ink.</li>
+                <li><strong>Identification Mark:</strong> Circle with ₹500 in raised print on the right side, designed to help visually impaired people identify the denomination.</li>
+                <li><strong>Number Panels:</strong> Numbers growing from small to big on the top left and bottom right, with the number '500' in the Devanagari script on the top right side.</li>
+                <li><strong>Latent Image:</strong> Denomination numeral '500' appears when the note is held at a 45-degree angle at eye level.</li>
+                <li><strong>Fluorescence:</strong> The number panels glow under UV light. Authentic notes have specific parts that fluoresce under UV light.</li>
+              </ul>
+            </div>
+            
+            <div className="space-y-3 mt-4">
+              <h3 className="font-medium">How to Verify a ₹500 Note</h3>
+              <ol className="space-y-2 list-decimal pl-5">
+                <li><strong>Visual Inspection:</strong> Examine the overall print quality. Authentic notes have sharp, clear printing without smudges or blurred edges.</li>
+                <li><strong>Feel the Note:</strong> Authentic notes have a distinct texture due to intaglio printing. Counterfeit notes often feel smoother or different.</li>
+                <li><strong>Check in Light:</strong> Hold the note against light to check for the watermark, security thread, and see-through register.</li>
+                <li><strong>Tilt the Note:</strong> Observe color changes in the security features, particularly the color-shifting ink on the ₹500 numeral.</li>
+                <li><strong>Magnify:</strong> Use a magnifying glass to check for microlettering and fine details that are difficult to replicate in counterfeits.</li>
+                <li><strong>UV Light Test:</strong> Under UV light, specific portions of genuine notes will glow while counterfeits typically show different patterns.</li>
+              </ol>
+            </div>
+            
+            <div className="bg-muted p-4 rounded-lg mt-4">
+              <h3 className="font-medium mb-2">What to Do If You Suspect a Counterfeit Note</h3>
+              <p className="text-sm text-muted-foreground">If you receive a suspicious note, do not return it to the person who gave it to you. Instead:</p>
+              <ul className="text-sm list-disc pl-5 mt-2 space-y-1">
+                <li>Note details of when and where you received it</li>
+                <li>Report it to the local police or a bank branch</li>
+                <li>Bank officials are trained to identify counterfeit notes and will provide guidance</li>
+                <li>Never attempt to use a note you suspect is counterfeit, as this is illegal</li>
               </ul>
             </div>
           </CardContent>
