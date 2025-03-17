@@ -19,16 +19,6 @@ const NavBar = () => {
           </Link>
           <nav className="hidden md:flex gap-6">
             <Link 
-              to="/" 
-              className={`text-sm font-medium transition-colors ${
-                isActive('/') 
-                  ? 'text-primary' 
-                  : 'text-foreground/80 hover:text-primary'
-              }`}
-            >
-              Keyphrase Generator
-            </Link>
-            <Link 
               to="/currency-auth" 
               className={`text-sm font-medium transition-colors ${
                 isActive('/currency-auth') 
