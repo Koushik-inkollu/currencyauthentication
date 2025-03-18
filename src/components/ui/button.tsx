@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -18,17 +19,38 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        modern: "bg-gradient-to-r from-primary to-blue-500 text-primary-foreground hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 active:translate-y-0",
+        '3d': "bg-primary text-primary-foreground shadow-[0_4px_0_0_hsl(var(--primary)/0.6)] hover:shadow-[0_2px_0_0_hsl(var(--primary)/0.6)] active:shadow-none transition-all duration-200 active:translate-y-[4px] hover:translate-y-[2px]",
+        glow: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(0,185,212,0.5)] transition-all duration-300",
+        glassmorphism: "bg-white/10 backdrop-blur-md border border-white/20 text-foreground hover:bg-white/20 transition-all duration-300",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
+        xl: "h-12 rounded-md px-10 text-base",
         icon: "h-10 w-10",
       },
+      rounded: {
+        default: "rounded-md",
+        full: "rounded-full",
+        lg: "rounded-lg",
+        xl: "rounded-xl",
+        '2xl': "rounded-2xl",
+      },
+      animation: {
+        none: "",
+        pulse: "animate-pulse",
+        bounce: "animate-bounce",
+        spin: "[&_svg]:animate-spin",
+        ping: "animate-ping",
+      }
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      rounded: "default",
+      animation: "none",
     },
   }
 )
@@ -40,11 +62,11 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, rounded, animation, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, rounded, animation, className }))}
         ref={ref}
         {...props}
       />
