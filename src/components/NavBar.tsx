@@ -2,6 +2,7 @@
 import React from 'react';
 import { ModeToggle } from './ModeToggle';
 import { Link, useLocation } from 'react-router-dom';
+import { Shield } from 'lucide-react';
 
 const NavBar = () => {
   const location = useLocation();
@@ -11,10 +12,11 @@ const NavBar = () => {
   };
   
   return (
-    <header className="border-b bg-card">
+    <header className="border-b bg-card sticky top-0 z-50">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link to="/" className="text-xl font-bold">
+        <div className="flex items-center gap-3">
+          <Link to="/" className="text-xl font-bold flex items-center gap-2">
+            <Shield className="h-5 w-5" />
             CurrencyGuard
           </Link>
           <nav className="hidden md:flex gap-6">

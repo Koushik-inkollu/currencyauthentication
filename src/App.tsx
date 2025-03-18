@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import CurrencyAuth from "./pages/CurrencyAuth"; 
+import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 
 // Create QueryClient outside of component to avoid React Hook errors
@@ -20,7 +21,7 @@ function App() {
             <Toaster />
             <Sonner />
             <Routes>
-              <Route path="/" element={<Navigate to="/currency-auth" replace />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="/currency-auth" element={<CurrencyAuth />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
