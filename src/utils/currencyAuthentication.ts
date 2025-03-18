@@ -47,8 +47,8 @@ export const preprocessImage = async (imageData: string): Promise<string> => {
       
       // Apply image processing for enhanced feature detection
       // Apply contrast enhancement
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
+      const canvasImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = canvasImageData.data;
       
       // Simple contrast enhancement
       const factor = 1.2; // Contrast factor
@@ -62,7 +62,7 @@ export const preprocessImage = async (imageData: string): Promise<string> => {
         // Alpha channel remains unchanged
       }
       
-      ctx.putImageData(imageData, 0, 0);
+      ctx.putImageData(canvasImageData, 0, 0);
       
       resolve(canvas.toDataURL('image/jpeg'));
     };
