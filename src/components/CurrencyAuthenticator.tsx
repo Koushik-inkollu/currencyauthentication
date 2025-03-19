@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,12 +29,12 @@ const CurrencyAuthenticator = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const sectionRefs = useRef<{ [key: string]: React.RefObject<HTMLDivElement> }>({});
 
-  // Add references for sections we want to track for fade-in effects
   useEffect(() => {
     sectionRefs.current = {
       uploadSection: React.createRef(),
@@ -68,6 +67,27 @@ const CurrencyAuthenticator = () => {
     
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (resultsRef.current) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+      
+      observer.observe(resultsRef.current);
+      
+      return () => {
+        observer.disconnect();
+      };
+    }
+  }, [result]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -149,23 +169,28 @@ const CurrencyAuthenticator = () => {
     setResult(null);
 
     try {
-      // Add a little animation before starting analysis
       const btn = document.querySelector('.analyze-btn');
       if (btn) {
         btn.classList.add('animate-pulse');
       }
       
-      // Preprocess the image
       const processedImageData = await preprocessImage(imageToAnalyze);
       
-      // Analyze the currency note
       const analysisResult = await analyzeCurrencyNote(processedImageData);
       
       setResult(analysisResult);
       
-      // Make sure the results section is visible by scrolling to it
       setTimeout(() => {
-        document.getElementById('resultsSection')?.scrollIntoView({ behavior: 'smooth' });
+        if (resultsRef.current) {
+          resultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          resultsRef.current.classList.add('highlight-result');
+          
+          setTimeout(() => {
+            if (resultsRef.current) {
+              resultsRef.current.classList.remove('highlight-result');
+            }
+          }, 1500);
+        }
       }, 300);
 
       toast({
@@ -191,7 +216,6 @@ const CurrencyAuthenticator = () => {
   const downloadReport = () => {
     if (!result) return;
 
-    // Create a simple report as text/html
     const reportContent = `
       <html>
         <head>
@@ -421,10 +445,10 @@ const CurrencyAuthenticator = () => {
         {result && (
           <div 
             id="resultsSection" 
-            ref={sectionRefs.current.resultsSection}
-            className={`fade-in-section ${visibleSections.has('resultsSection') ? 'is-visible' : ''} mt-8`}
+            ref={resultsRef}
+            className="fade-in-section mt-12 mb-8 result-container"
           >
-            <Card className="border-2 border-primary/20 shadow-lg">
+            <Card className="border-2 border-primary/20 shadow-lg animate-result">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Shield className="mr-2 h-5 w-5 text-primary" />
@@ -496,7 +520,6 @@ const CurrencyAuthenticator = () => {
                   </ul>
                 </div>
 
-                {/* Add confidence metrics section */}
                 <div className="mt-4">
                   <h3 className="text-lg font-medium mb-2">Analysis Confidence</h3>
                   <div className="p-4 bg-muted/50 rounded-lg">
@@ -570,9 +593,7 @@ const CurrencyAuthenticator = () => {
             </CardHeader>
             
             <CardContent className="space-y-8">
-              {/* Front and Back Notes with Security Feature Numbers */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Front Note */}
                 <div 
                   id="frontNote"
                   ref={sectionRefs.current.frontNote}
@@ -586,7 +607,6 @@ const CurrencyAuthenticator = () => {
                       className="w-full h-auto"
                     />
                     
-                    {/* Security feature points */}
                     <div className="security-point absolute top-[13%] left-[14%]">
                       <div className="absolute -top-7 -left-2 flex items-center justify-center bg-primary text-white text-xs font-bold rounded-full w-5 h-5">
                         13
@@ -619,7 +639,6 @@ const CurrencyAuthenticator = () => {
                   </div>
                 </div>
                 
-                {/* Back Note */}
                 <div 
                   id="backNote"
                   ref={sectionRefs.current.backNote}
@@ -633,7 +652,6 @@ const CurrencyAuthenticator = () => {
                       className="w-full h-auto"
                     />
                     
-                    {/* Security feature points */}
                     <div className="security-point absolute top-[75%] left-[10%]">
                       <div className="absolute -top-7 -left-2 flex items-center justify-center bg-primary text-white text-xs font-bold rounded-full w-5 h-5">
                         1
@@ -709,7 +727,6 @@ const CurrencyAuthenticator = () => {
                 </div>
               </div>
               
-              {/* Security Features Description */}
               <div 
                 id="featuresSection"
                 ref={sectionRefs.current.featuresSection}

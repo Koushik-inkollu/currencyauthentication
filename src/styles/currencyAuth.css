@@ -1,5 +1,7 @@
 
-/* Currency authenticator styling */
+/* Currency Authentication Page Styles */
+
+/* Fade In Animation */
 .fade-in-section {
   opacity: 0;
   transform: translateY(20px);
@@ -11,11 +13,158 @@
   transform: translateY(0);
 }
 
-.rupee-pulse {
-  animation: pulse 2s infinite;
+/* Result Container Animations */
+.result-container {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
 
-@keyframes pulse {
+.result-container.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.highlight-result {
+  animation: highlightPulse 1.5s ease-in-out;
+}
+
+@keyframes highlightPulse {
+  0% { box-shadow: 0 0 0 0 rgba(var(--primary), 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(var(--primary), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--primary), 0); }
+}
+
+.animate-result {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Currency Note Styles */
+.currency-note {
+  transition: transform 0.3s ease-in-out;
+  position: relative;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.currency-note:hover {
+  transform: scale(1.02);
+}
+
+.currency-note-container {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Security Points & Features */
+.security-point {
+  width: 8px;
+  height: 8px;
+  background-color: hsl(var(--primary));
+  border-radius: 50%;
+  position: absolute;
+  transition: transform 0.3s ease;
+}
+
+.security-point:hover {
+  transform: scale(1.5);
+}
+
+.feature-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.number-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: hsl(var(--primary));
+  color: white;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Button Styles */
+.auth-button {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.8) 100%);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.auth-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(var(--primary), 0.3);
+}
+
+.auth-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, hsl(var(--primary)/0.8) 0%, hsl(var(--primary)) 100%);
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.auth-button:hover::after {
+  opacity: 1;
+}
+
+.btn-3d {
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  position: relative;
+  top: 0;
+}
+
+.btn-3d:hover {
+  top: -2px;
+  box-shadow: 0 6px 10px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-3d:active {
+  top: 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Glassmorphism Effect */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Rupee Pulse Animation */
+.rupee-pulse {
+  animation: rupee-pulse 2s infinite;
+}
+
+@keyframes rupee-pulse {
   0% {
     transform: scale(1);
     opacity: 1;
@@ -30,105 +179,7 @@
   }
 }
 
-.currency-note {
-  transition: transform 0.3s ease;
-}
-
-.currency-note:hover {
-  transform: scale(1.02);
-}
-
-.auth-button {
-  position: relative;
-  transition: all 0.3s ease;
-  overflow: hidden;
-}
-
-.auth-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left 0.7s ease;
-}
-
-.auth-button:hover::before {
-  left: 100%;
-}
-
-.feature-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.number-marker {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-  border-radius: 50%;
-  font-size: 12px;
-  margin-right: 8px;
-  padding: 0 6px;
-}
-
-.security-point {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background-color: hsl(var(--primary));
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.3);
-  animation: pulse-point 2s infinite;
-}
-
-@keyframes pulse-point {
-  0% {
-    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(var(--primary-rgb), 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0);
-  }
-}
-
-.currency-note-container {
-  position: relative;
-  z-index: 1;
-  transition: transform 0.5s ease;
-}
-
-.currency-note-container:hover {
-  transform: scale(1.02);
-  z-index: 2;
-}
-
-.btn-3d {
-  position: relative;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.glassmorphism {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+/* Make the analysis result more prominent */
+#resultsSection {
+  scroll-margin-top: 80px;
 }
