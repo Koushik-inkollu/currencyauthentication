@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import CurrencyAuth from "./pages/CurrencyAuth"; 
 import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
+import "./styles/currencyAuth.css"; // Import the new CSS file
 
 // Create QueryClient outside of component to avoid React Hook errors
 const queryClient = new QueryClient();
