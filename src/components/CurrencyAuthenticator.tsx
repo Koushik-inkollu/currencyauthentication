@@ -162,6 +162,11 @@ const CurrencyAuthenticator = () => {
       const analysisResult = await analyzeCurrencyNote(processedImageData);
       
       setResult(analysisResult);
+      
+      // Make sure the results section is visible by scrolling to it
+      setTimeout(() => {
+        document.getElementById('resultsSection')?.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
 
       toast({
         title: "Analysis Complete",
@@ -257,7 +262,7 @@ const CurrencyAuthenticator = () => {
             <Button 
               className="auth-button group"
               size="lg"
-              onClick={() => document.getElementById('upload-section')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => document.getElementById('uploadSection')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Start Authentication
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -417,7 +422,7 @@ const CurrencyAuthenticator = () => {
           <div 
             id="resultsSection" 
             ref={sectionRefs.current.resultsSection}
-            className={`fade-in-section ${visibleSections.has('resultsSection') ? 'is-visible' : ''}`}
+            className={`fade-in-section ${visibleSections.has('resultsSection') ? 'is-visible' : ''} mt-8`}
           >
             <Card className="border-2 border-primary/20 shadow-lg">
               <CardHeader>
@@ -438,7 +443,7 @@ const CurrencyAuthenticator = () => {
                       The analyzed note appears to be genuine with {Math.round(result.confidence * 100)}% confidence.
                     </AlertDescription>
                   </Alert>
-                ) : result.confidence < 0.7 ? (
+                ) : result.confidence >= 0.65 ? (
                   <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-900/30">
                     <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                     <AlertTitle className="text-yellow-800 dark:text-yellow-400">Suspicious Currency</AlertTitle>
@@ -489,6 +494,36 @@ const CurrencyAuthenticator = () => {
                       </li>
                     ))}
                   </ul>
+                </div>
+
+                {/* Add confidence metrics section */}
+                <div className="mt-4">
+                  <h3 className="text-lg font-medium mb-2">Analysis Confidence</h3>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="mb-2"><strong>Overall confidence:</strong> {Math.round(result.confidence * 100)}%</p>
+                    
+                    <div className="mb-2">
+                      <strong>Strongest features:</strong>
+                      <ul className="list-disc pl-5 mt-1">
+                        {result.confidenceMetrics?.strongestFeatures?.map((feature: string, idx: number) => (
+                          <li key={idx} className="text-sm">
+                            {feature.replace(/([A-Z])/g, ' $1').trim()}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <strong>Weakest features:</strong>
+                      <ul className="list-disc pl-5 mt-1">
+                        {result.confidenceMetrics?.weakestFeatures?.map((feature: string, idx: number) => (
+                          <li key={idx} className="text-sm">
+                            {feature.replace(/([A-Z])/g, ' $1').trim()}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col space-y-2">
