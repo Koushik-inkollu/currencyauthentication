@@ -47,28 +47,49 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     const files = event.target.files;
     if (!files || files.length === 0) return;
     
-    const file = files[0];
-    if (!validateFile(file)) return;
-    
     // Create a copy of current images
     const newImages = [...images];
     
-    // If a slot is active, replace that image
+    // Handle multiple file selection
+    const selectedFiles = Array.from(files);
+    const availableSlots = maxImages - newImages.length;
+    
+    // If we have an active slot, we're replacing a specific image
     if (activeSlot !== null && activeSlot < maxImages) {
-      const fileUrl = URL.createObjectURL(file);
-      newImages[activeSlot] = { file, preview: fileUrl };
+      if (selectedFiles.length === 1) {
+        const file = selectedFiles[0];
+        if (validateFile(file)) {
+          const fileUrl = URL.createObjectURL(file);
+          newImages[activeSlot] = { file, preview: fileUrl };
+        }
+      } else {
+        // If multiple files selected when replacing one image, just use the first
+        const file = selectedFiles[0];
+        if (validateFile(file)) {
+          const fileUrl = URL.createObjectURL(file);
+          newImages[activeSlot] = { file, preview: fileUrl };
+        }
+      }
     } 
-    // Otherwise, add to the end if we haven't reached max
-    else if (images.length < maxImages) {
-      const fileUrl = URL.createObjectURL(file);
-      newImages.push({ file, preview: fileUrl });
-    } else {
-      toast({
-        title: "Maximum images reached",
-        description: `You can only upload up to ${maxImages} images.`,
-        variant: "destructive"
-      });
-      return;
+    // Otherwise, we're adding new images
+    else {
+      // Process as many files as we have slots for
+      for (let i = 0; i < Math.min(selectedFiles.length, availableSlots); i++) {
+        const file = selectedFiles[i];
+        if (validateFile(file)) {
+          const fileUrl = URL.createObjectURL(file);
+          newImages.push({ file, preview: fileUrl });
+        }
+      }
+      
+      // Notify if some files weren't added due to slot limitations
+      if (selectedFiles.length > availableSlots) {
+        toast({
+          title: "Some images not added",
+          description: `Only added ${availableSlots} out of ${selectedFiles.length} images due to the limit of ${maxImages} images.`,
+          variant: "default"
+        });
+      }
     }
     
     setImages(newImages);
@@ -166,6 +187,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
   
+  const triggerMultipleFileInput = () => {
+    setActiveSlot(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
   // Clean up object URLs when component unmounts
   React.useEffect(() => {
     return () => {
@@ -175,7 +203,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Upload Images</h3>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Upload Images</h3>
+        {images.length < maxImages && !isCameraActive && (
+          <Button onClick={triggerMultipleFileInput} size="sm" variant="outline">
+            <Upload className="h-4 w-4 mr-1" />
+            Select Multiple Files
+          </Button>
+        )}
+      </div>
       
       {error && (
         <Alert variant="destructive">
@@ -260,6 +296,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         ref={fileInputRef}
         onChange={handleFileChange}
         accept="image/jpeg,image/png"
+        multiple
         className="hidden"
       />
     </div>

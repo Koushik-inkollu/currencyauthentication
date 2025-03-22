@@ -43,7 +43,7 @@ const CurrencyAuthWithImages: React.FC = () => {
           <div className="space-y-2">
             <h2 className="text-2xl font-bold">Upload Currency Images</h2>
             <p className="text-muted-foreground">
-              Please upload up to 2 images of the ₹500 note you want to authenticate.
+              Select up to 2 images at once or take them one after another with your camera.
             </p>
           </div>
           
