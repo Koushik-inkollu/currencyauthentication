@@ -4,8 +4,12 @@ import NavBar from '@/components/NavBar';
 import KeyphraseGenerator from '@/components/KeyphraseGenerator';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/providers/AuthProvider';
+import { User, Shield } from 'lucide-react';
 
 const Index = () => {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
@@ -19,6 +23,22 @@ const Index = () => {
               <Button asChild>
                 <Link to="/currency-auth">₹500 Currency Authentication</Link>
               </Button>
+              
+              {!user ? (
+                <Button asChild variant="outline">
+                  <Link to="/auth" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Sign in / Register
+                  </Link>
+                </Button>
+              ) : (
+                <Button asChild variant="secondary">
+                  <Link to="/currency-auth" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    My Dashboard
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
         </div>
