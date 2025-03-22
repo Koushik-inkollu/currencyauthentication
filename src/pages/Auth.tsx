@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, Lock, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 type AuthMode = 'login' | 'signup' | 'forgotPassword';
 
@@ -18,31 +19,13 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [mode, setMode] = useState<AuthMode>('login');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
 
-  // Check if user is already logged in
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        navigate('/');
-      }
-    };
-
-    checkSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate('/');
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
+  // Get the page user tried to visit before being redirected to login
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
 
   const validateEmail = (email: string) => {
     return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
@@ -54,30 +37,20 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    
     if (!validateEmail(email)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address",
-        variant: "destructive"
-      });
+      setError("Please enter a valid email address");
       return;
     }
 
     if (!validatePassword(password)) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long",
-        variant: "destructive"
-      });
+      setError("Password must be at least 6 characters long");
       return;
     }
 
     if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match",
-        variant: "destructive"
-      });
+      setError("Passwords don't match");
       return;
     }
 
@@ -96,11 +69,8 @@ const Auth = () => {
       });
       setMode('login');
     } catch (error: any) {
-      toast({
-        title: "Sign up failed",
-        description: error.message,
-        variant: "destructive"
-      });
+      setError(error.message);
+      console.error("Signup error:", error);
     } finally {
       setLoading(false);
     }
@@ -108,12 +78,10 @@ const Auth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    
     if (!validateEmail(email)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address",
-        variant: "destructive"
-      });
+      setError("Please enter a valid email address");
       return;
     }
 
@@ -130,13 +98,11 @@ const Auth = () => {
         title: "Login successful!",
         description: "You have been logged in.",
       });
-      navigate('/');
+      // Redirect to the page they tried to visit or homepage
+      navigate(from, { replace: true });
     } catch (error: any) {
-      toast({
-        title: "Login failed",
-        description: error.message,
-        variant: "destructive"
-      });
+      setError(error.message);
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
     }
@@ -144,12 +110,10 @@ const Auth = () => {
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    
     if (!validateEmail(email)) {
-      toast({
-        title: "Invalid email",
-        description: "Please enter a valid email address",
-        variant: "destructive"
-      });
+      setError("Please enter a valid email address");
       return;
     }
 
@@ -166,11 +130,8 @@ const Auth = () => {
         description: "Please check your email for a password reset link.",
       });
     } catch (error: any) {
-      toast({
-        title: "Failed to send reset email",
-        description: error.message,
-        variant: "destructive"
-      });
+      setError(error.message);
+      console.error("Password reset error:", error);
     } finally {
       setLoading(false);
     }
@@ -181,6 +142,11 @@ const Auth = () => {
       case 'signup':
         return (
           <form onSubmit={handleSignUp} className="space-y-4">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -234,7 +200,10 @@ const Auth = () => {
               <button
                 type="button"
                 className="text-primary hover:underline"
-                onClick={() => setMode('login')}
+                onClick={() => {
+                  setError(null);
+                  setMode('login');
+                }}
               >
                 Log In
               </button>
@@ -244,6 +213,11 @@ const Auth = () => {
       case 'forgotPassword':
         return (
           <form onSubmit={handleForgotPassword} className="space-y-4">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -266,7 +240,10 @@ const Auth = () => {
               <button
                 type="button"
                 className="flex items-center gap-1 mx-auto text-primary hover:underline"
-                onClick={() => setMode('login')}
+                onClick={() => {
+                  setError(null);
+                  setMode('login');
+                }}
               >
                 <ArrowLeft className="h-4 w-4" /> Back to Login
               </button>
@@ -277,6 +254,11 @@ const Auth = () => {
       default:
         return (
           <form onSubmit={handleLogin} className="space-y-4">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -298,7 +280,10 @@ const Auth = () => {
                 <button
                   type="button"
                   className="text-sm text-primary hover:underline"
-                  onClick={() => setMode('forgotPassword')}
+                  onClick={() => {
+                    setError(null);
+                    setMode('forgotPassword');
+                  }}
                 >
                   Forgot Password?
                 </button>
@@ -324,7 +309,10 @@ const Auth = () => {
               <button
                 type="button"
                 className="text-primary hover:underline"
-                onClick={() => setMode('signup')}
+                onClick={() => {
+                  setError(null);
+                  setMode('signup');
+                }}
               >
                 Sign Up
               </button>
