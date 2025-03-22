@@ -320,7 +320,7 @@ const Auth = () => {
               {loading ? 'Logging in...' : 'Log In'}
             </Button>
             <div className="text-center text-sm">
-              Don&apos;t have an account?{' '}
+              Don't have an account?{' '}
               <button
                 type="button"
                 className="text-primary hover:underline"
@@ -346,7 +346,7 @@ const Auth = () => {
             <CardDescription className="text-center">
               {mode === 'login' ? 'Enter your email and password to log in' : 
                mode === 'signup' ? 'Enter your details to create a new account' : 
-               'Enter your email and we\'ll send you a reset link'}
+               'Enter your email and we'll send you a reset link'}
             </CardDescription>
           </CardHeader>
           <CardContent>
