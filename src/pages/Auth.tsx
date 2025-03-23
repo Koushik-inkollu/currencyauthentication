@@ -1,206 +1,360 @@
 
 import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from '@/integrations/supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useLanguage } from '@/providers/LanguageProvider';
-import LanguageSelector from '@/components/LanguageSelector';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Lock, Mail } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import NavBar from '@/components/NavBar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+type AuthMode = 'login' | 'signup' | 'forgotPassword';
 
 const Auth = () => {
-  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [mode, setMode] = useState<AuthMode>('login');
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as any)?.from?.pathname || '/';
+  const { toast } = useToast();
+
+  // Get the page user tried to visit before being redirected to login
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
+
+  const validateEmail = (email: string) => {
+    return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+  };
+
+  const validatePassword = (password: string) => {
+    return password.length >= 6;
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords don't match");
+      return;
+    }
+
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
       });
-      
+
       if (error) throw error;
-      
+
       toast({
-        title: "Success!",
-        description: "Check your email for the confirmation link.",
+        title: "Sign up successful!",
+        description: "Please check your email for a confirmation link.",
       });
-      
-      // If auto-confirm is enabled, this will work
-      if (data.user && data.session) {
-        navigate(from);
-      }
+      setMode('login');
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "An error occurred during sign up.",
-        variant: "destructive",
-      });
+      setError(error.message);
+      console.error("Signup error:", error);
     } finally {
       setLoading(false);
     }
   };
-  
-  const handleSignIn = async (e: React.FormEvent) => {
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
+
       if (error) throw error;
-      
+
       toast({
-        title: "Success!",
-        description: "You have successfully signed in.",
+        title: "Login successful!",
+        description: "You have been logged in.",
       });
-      
-      navigate(from);
+      // Redirect to the page they tried to visit or homepage
+      navigate(from, { replace: true });
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Invalid login credentials.",
-        variant: "destructive",
-      });
+      setError(error.message);
+      console.error("Login error:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=login`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Password reset email sent",
+        description: "Please check your email for a password reset link.",
+      });
+    } catch (error: any) {
+      setError(error.message);
+      console.error("Password reset error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderForm = () => {
+    switch (mode) {
+      case 'signup':
+        return (
+          <form onSubmit={handleSignUp} className="space-y-4">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  className="pl-10"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="pl-10"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  className="pl-10"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Creating account...' : 'Sign Up'}
+            </Button>
+            <div className="text-center text-sm">
+              Already have an account?{' '}
+              <button
+                type="button"
+                className="text-primary hover:underline"
+                onClick={() => {
+                  setError(null);
+                  setMode('login');
+                }}
+              >
+                Log In
+              </button>
+            </div>
+          </form>
+        );
+      case 'forgotPassword':
+        return (
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  className="pl-10"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Sending reset link...' : 'Send Reset Link'}
+            </Button>
+            <div className="text-center text-sm">
+              <button
+                type="button"
+                className="flex items-center gap-1 mx-auto text-primary hover:underline"
+                onClick={() => {
+                  setError(null);
+                  setMode('login');
+                }}
+              >
+                <ArrowLeft className="h-4 w-4" /> Back to Login
+              </button>
+            </div>
+          </form>
+        );
+      case 'login':
+      default:
+        return (
+          <form onSubmit={handleLogin} className="space-y-4">
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  className="pl-10"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <button
+                  type="button"
+                  className="text-sm text-primary hover:underline"
+                  onClick={() => {
+                    setError(null);
+                    setMode('forgotPassword');
+                  }}
+                >
+                  Forgot Password?
+                </button>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="pl-10"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Logging in...' : 'Log In'}
+            </Button>
+            <div className="text-center text-sm">
+              Don&apos;t have an account?{' '}
+              <button
+                type="button"
+                className="text-primary hover:underline"
+                onClick={() => {
+                  setError(null);
+                  setMode('signup');
+                }}
+              >
+                Sign Up
+              </button>
+            </div>
+          </form>
+        );
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
-      <div className="absolute top-4 right-4">
-        <LanguageSelector />
-      </div>
-      
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t('signInRegister')}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {t('appSubtitle')}
-          </p>
-        </div>
-        
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Register</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="signin">
-            <Card>
-              <form onSubmit={handleSignIn}>
-                <CardHeader>
-                  <CardTitle>Sign In</CardTitle>
-                  <CardDescription>
-                    Enter your email and password to sign in
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
-                    <Input 
-                      id="signin-email" 
-                      type="email" 
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
-                    <Input 
-                      id="signin-password" 
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (
-                      <span className="flex items-center">
-                        <span className="animate-spin mr-2">⟳</span> Signing in...
-                      </span>
-                    ) : (
-                      "Sign In"
-                    )}
-                  </Button>
-                </CardFooter>
-              </form>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="signup">
-            <Card>
-              <form onSubmit={handleSignUp}>
-                <CardHeader>
-                  <CardTitle>Create an account</CardTitle>
-                  <CardDescription>
-                    Enter your information to create an account
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input 
-                      id="signup-email" 
-                      type="email" 
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input 
-                      id="signup-password" 
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? (
-                      <span className="flex items-center">
-                        <span className="animate-spin mr-2">⟳</span> Creating account...
-                      </span>
-                    ) : (
-                      "Create Account"
-                    )}
-                  </Button>
-                </CardFooter>
-              </form>
-            </Card>
-          </TabsContent>
-        </Tabs>
-        
-        <p className="px-8 text-center text-sm text-muted-foreground">
-          By continuing, you agree to our Terms of Service and Privacy Policy.
-        </p>
-      </div>
+    <div className="min-h-screen flex flex-col bg-background">
+      <NavBar />
+      <main className="flex-1 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              {mode === 'login' ? 'Welcome back' : mode === 'signup' ? 'Create an account' : 'Reset your password'}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {mode === 'login' ? 'Enter your email and password to log in' : 
+               mode === 'signup' ? 'Enter your details to create a new account' : 
+               'Enter your email and we\'ll send you a reset link'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {renderForm()}
+          </CardContent>
+          <CardFooter className="flex justify-center border-t pt-5">
+            <p className="text-center text-xs text-muted-foreground">
+              By clicking continue, you agree to our{' '}
+              <a href="#" className="underline hover:text-primary">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="#" className="underline hover:text-primary">
+                Privacy Policy
+              </a>
+              .
+            </p>
+          </CardFooter>
+        </Card>
+      </main>
     </div>
   );
 };

@@ -3,12 +3,8 @@ import React, { useEffect } from 'react';
 import NavBar from '@/components/NavBar';
 import CurrencyAuthenticator from '@/components/CurrencyAuthenticator';
 import { setupFadeInObserver } from '@/utils/animationObserver';
-import LanguageSelector from '@/components/LanguageSelector';
-import { useLanguage } from '@/providers/LanguageProvider';
 
 const CurrencyAuth = () => {
-  const { t } = useLanguage();
-  
   useEffect(() => {
     // Setup fade-in animations when components come into view
     const observer = setupFadeInObserver();
@@ -44,16 +40,11 @@ const CurrencyAuth = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
       <main className="flex-1">
-        <div className="container py-4 max-w-5xl mx-auto">
-          <div className="flex justify-end mb-4">
-            <LanguageSelector />
-          </div>
-          <CurrencyAuthenticator />
-        </div>
+        <CurrencyAuthenticator />
       </main>
       <footer className="py-6 border-t">
         <div className="container text-center text-sm text-muted-foreground">
-          <p>{t('copyright', { year: new Date().getFullYear() })}</p>
+          <p>₹500 Currency Authentication System &copy; {new Date().getFullYear()} - Detect counterfeit ₹500 notes</p>
         </div>
       </footer>
     </div>
