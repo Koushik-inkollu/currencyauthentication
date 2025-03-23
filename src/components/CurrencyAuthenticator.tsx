@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -798,5 +799,20 @@ const CurrencyAuthenticator = () => {
                       Text stating "I promise to pay the bearer the sum of five hundred rupees" with the Governor's signature.
                     </p>
                   </div>
-                  
-                  <div className="feature-card p-4
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button variant="outline" className="w-full" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                <Eye className="mr-2 h-4 w-4" />
+                {t('backToTop')}
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CurrencyAuthenticator;
