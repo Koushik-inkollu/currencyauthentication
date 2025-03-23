@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Define our supported languages
@@ -545,3 +546,44 @@ const getBrowserLanguage = (): Language => {
 
 // Read from session storage or get browser language
 const getInitialLanguage = (): Language => {
+  if (typeof window !== 'undefined') {
+    const savedLanguage = sessionStorage.getItem('preferredLanguage') as Language;
+    if (savedLanguage && savedLanguage in translations) {
+      return savedLanguage;
+    }
+  }
+  return getBrowserLanguage();
+};
+
+// The language provider component
+export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+  const [language, setLanguageState] = useState<Language>(getInitialLanguage());
+
+  // Translation function
+  const t = (key: string, params?: Record<string, any>): string => {
+    let translation = translations[language][key] || translations['en'][key] || key;
+    
+    // Replace parameters in the translation
+    if (params) {
+      Object.entries(params).forEach(([paramKey, paramValue]) => {
+        translation = translation.replace(`{{${paramKey}}}`, String(paramValue));
+      });
+    }
+    
+    return translation;
+  };
+
+  // Update language and save to session storage
+  const setLanguage = (newLanguage: Language) => {
+    setLanguageState(newLanguage);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('preferredLanguage', newLanguage);
+    }
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+};
