@@ -9,7 +9,7 @@ import { LogOut, Shield, User } from 'lucide-react';
 import { useLanguage } from '@/providers/LanguageProvider';
 
 const NavBar = () => {
-  const { user, logout, loading } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const { t } = useLanguage();
 
   return (
@@ -34,7 +34,7 @@ const NavBar = () => {
                       {t('currencyAuth')}
                     </Button>
                   </Link>
-                  <Button onClick={logout} variant="ghost" size="icon" className="text-muted-foreground">
+                  <Button onClick={signOut} variant="ghost" size="icon" className="text-muted-foreground">
                     <LogOut className="h-5 w-5" />
                   </Button>
                 </div>
