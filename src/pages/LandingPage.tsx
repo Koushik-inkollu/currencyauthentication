@@ -4,8 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Shield, IndianRupee, Camera, Check, AlertTriangle, Zap, Lock } from 'lucide-react';
 import NavBar from '@/components/NavBar';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 const LandingPage = () => {
+  const { t } = useLanguage();
+  
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <NavBar />
@@ -17,17 +20,17 @@ const LandingPage = () => {
             <div className="flex flex-col justify-center space-y-4 transform-style-3d rotate-y-1 transition-transform duration-500 hover:rotate-y-0">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none drop-shadow-md">
-                  Authenticate ₹500 Notes with Precision
+                  {t('authenticatePrecision')}
                 </h1>
                 <p className="max-w-[600px] text-muted-foreground md:text-xl shadow-sm">
-                  CurrencyGuard's advanced hybrid decision system analyzes multiple security features to verify ₹500 notes with exceptional accuracy.
+                  {t('currencyGuardDesc')}
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
                 <Button asChild size="lg" className="gap-1 shadow-lg hover:shadow-primary/50 transform transition-all hover:-translate-y-1">
                   <Link to="/currency-auth">
                     <Shield className="h-5 w-5" />
-                    Start Authentication
+                    {t('startAuth')}
                   </Link>
                 </Button>
               </div>
@@ -52,9 +55,9 @@ const LandingPage = () => {
         <div className="container px-4 md:px-6 relative z-10">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl drop-shadow-sm">Advanced Security Analysis</h2>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl drop-shadow-sm">{t('advancedSecurity')}</h2>
               <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Our hybrid decision system leverages multiple verification techniques for 99.8% accuracy
+                {t('hybraidDesc')}
               </p>
             </div>
           </div>
@@ -64,9 +67,9 @@ const LandingPage = () => {
                 <Camera className="h-10 w-10 text-primary" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold">Multi-Point Analysis</h3>
+                <h3 className="text-xl font-bold">{t('multiPoint')}</h3>
                 <p className="text-muted-foreground">
-                  Examines 15+ security features simultaneously for comprehensive verification
+                  {t('multiPointDesc')}
                 </p>
               </div>
             </div>
@@ -75,9 +78,9 @@ const LandingPage = () => {
                 <Zap className="h-10 w-10 text-primary" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold">Hybrid Decision System</h3>
+                <h3 className="text-xl font-bold">{t('hybridSystem')}</h3>
                 <p className="text-muted-foreground">
-                  Combines computer vision with expert verification rules for enhanced accuracy
+                  {t('hybridSystemDesc')}
                 </p>
               </div>
             </div>
@@ -86,9 +89,9 @@ const LandingPage = () => {
                 <Check className="h-10 w-10 text-primary" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold">Confidence Scoring</h3>
+                <h3 className="text-xl font-bold">{t('confidenceScoring')}</h3>
                 <p className="text-muted-foreground">
-                  Provides detailed confidence scores for each analyzed security feature
+                  {t('confidenceScoringDesc')}
                 </p>
               </div>
             </div>
@@ -97,9 +100,9 @@ const LandingPage = () => {
                 <AlertTriangle className="h-10 w-10 text-primary" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold">Counterfeit Detection</h3>
+                <h3 className="text-xl font-bold">{t('counterfeitDetection')}</h3>
                 <p className="text-muted-foreground">
-                  Advanced algorithms to identify common and sophisticated counterfeiting techniques
+                  {t('counterfeitDetectionDesc')}
                 </p>
               </div>
             </div>
@@ -108,9 +111,9 @@ const LandingPage = () => {
                 <Lock className="h-10 w-10 text-primary" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold">Security Verification</h3>
+                <h3 className="text-xl font-bold">{t('securityVerification')}</h3>
                 <p className="text-muted-foreground">
-                  Validates microprinting, watermarks, and specialized ink patterns with precision
+                  {t('securityVerificationDesc')}
                 </p>
               </div>
             </div>
@@ -119,9 +122,9 @@ const LandingPage = () => {
                 <IndianRupee className="h-10 w-10 text-primary" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-bold">Currency Expertise</h3>
+                <h3 className="text-xl font-bold">{t('currencyExpertise')}</h3>
                 <p className="text-muted-foreground">
-                  Built with expertise from currency specialists and security printing technologies
+                  {t('currencyExpertiseDesc')}
                 </p>
               </div>
             </div>
@@ -134,9 +137,9 @@ const LandingPage = () => {
         <div className="container px-4 md:px-6">
           <div className="flex flex-col lg:flex-row gap-12 items-center">
             <div className="lg:w-1/2 space-y-4">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Hybrid Decision Technology</h2>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">{t('hybridDecisionTech')}</h2>
               <p className="text-muted-foreground md:text-lg">
-                Our system combines multiple verification technologies to achieve industry-leading accuracy:
+                {t('hybridTechDesc')}
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
@@ -187,16 +190,16 @@ const LandingPage = () => {
         <div className="container px-4 md:px-6 relative z-10">
           <div className="flex flex-col items-center justify-center space-y-4 text-center max-w-3xl mx-auto">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Ready to Verify Your Currency?</h2>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">{t('readyToVerify')}</h2>
               <p className="text-muted-foreground md:text-xl/relaxed">
-                Start using our industry-leading authentication system to protect yourself from sophisticated counterfeit notes.
+                {t('startUsingDesc')}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
               <Button asChild size="lg" className="gap-1 shadow-lg hover:shadow-primary/50 transform transition-all hover:-translate-y-1">
                 <Link to="/currency-auth">
                   <Shield className="h-5 w-5" />
-                  Authenticate Now
+                  {t('authNow')}
                 </Link>
               </Button>
             </div>

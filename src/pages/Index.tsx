@@ -5,10 +5,12 @@ import KeyphraseGenerator from '@/components/KeyphraseGenerator';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
+import { useLanguage } from '@/providers/LanguageProvider';
 import { User, Shield } from 'lucide-react';
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -21,7 +23,7 @@ const Index = () => {
             
             <div className="flex flex-wrap gap-4 justify-center mt-6">
               <Button asChild>
-                <Link to="/currency-auth">₹500 Currency Authentication</Link>
+                <Link to="/currency-auth">{t('currencyAuth')}</Link>
               </Button>
               
               {!loading && (
@@ -29,7 +31,7 @@ const Index = () => {
                   <Button asChild variant="outline">
                     <Link to="/auth" className="flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      Sign in / Register
+                      {t('login')} / {t('signup')}
                     </Link>
                   </Button>
                 ) : (

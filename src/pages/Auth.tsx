@@ -10,6 +10,7 @@ import { ArrowLeft, Lock, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import NavBar from '@/components/NavBar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 type AuthMode = 'login' | 'signup' | 'forgotPassword';
 
@@ -23,6 +24,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // Get the page user tried to visit before being redirected to login
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
@@ -148,7 +150,7 @@ const Auth = () => {
               </Alert>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -163,7 +165,7 @@ const Auth = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -178,7 +180,7 @@ const Auth = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -193,10 +195,10 @@ const Auth = () => {
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Sign Up'}
+              {loading ? t('creatingAccount') : t('signup')}
             </Button>
             <div className="text-center text-sm">
-              Already have an account?{' '}
+              {t('hasAccount')}{' '}
               <button
                 type="button"
                 className="text-primary hover:underline"
@@ -205,7 +207,7 @@ const Auth = () => {
                   setMode('login');
                 }}
               >
-                Log In
+                {t('login')}
               </button>
             </div>
           </form>
@@ -219,7 +221,7 @@ const Auth = () => {
               </Alert>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -234,7 +236,7 @@ const Auth = () => {
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Sending reset link...' : 'Send Reset Link'}
+              {loading ? t('sendingResetLink') : t('sendResetLink')}
             </Button>
             <div className="text-center text-sm">
               <button
@@ -245,7 +247,7 @@ const Auth = () => {
                   setMode('login');
                 }}
               >
-                <ArrowLeft className="h-4 w-4" /> Back to Login
+                <ArrowLeft className="h-4 w-4" /> {t('backToLogin')}
               </button>
             </div>
           </form>
@@ -260,7 +262,7 @@ const Auth = () => {
               </Alert>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -276,7 +278,7 @@ const Auth = () => {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('password')}</Label>
                 <button
                   type="button"
                   className="text-sm text-primary hover:underline"
@@ -285,7 +287,7 @@ const Auth = () => {
                     setMode('forgotPassword');
                   }}
                 >
-                  Forgot Password?
+                  {t('forgotPassword')}
                 </button>
               </div>
               <div className="relative">
@@ -302,10 +304,10 @@ const Auth = () => {
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Logging in...' : 'Log In'}
+              {loading ? t('loggingIn') : t('login')}
             </Button>
             <div className="text-center text-sm">
-              Don&apos;t have an account?{' '}
+              {t('noAccount')}{' '}
               <button
                 type="button"
                 className="text-primary hover:underline"
@@ -314,7 +316,7 @@ const Auth = () => {
                   setMode('signup');
                 }}
               >
-                Sign Up
+                {t('signup')}
               </button>
             </div>
           </form>
@@ -329,12 +331,12 @@ const Auth = () => {
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">
-              {mode === 'login' ? 'Welcome back' : mode === 'signup' ? 'Create an account' : 'Reset your password'}
+              {mode === 'login' ? t('welcomeBack') : mode === 'signup' ? t('createAccount') : t('resetPassword')}
             </CardTitle>
             <CardDescription className="text-center">
-              {mode === 'login' ? 'Enter your email and password to log in' : 
-               mode === 'signup' ? 'Enter your details to create a new account' : 
-               'Enter your email and we\'ll send you a reset link'}
+              {mode === 'login' ? t('loginDesc') : 
+               mode === 'signup' ? t('signupDesc') : 
+               t('resetDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -342,15 +344,7 @@ const Auth = () => {
           </CardContent>
           <CardFooter className="flex justify-center border-t pt-5">
             <p className="text-center text-xs text-muted-foreground">
-              By clicking continue, you agree to our{' '}
-              <a href="#" className="underline hover:text-primary">
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a href="#" className="underline hover:text-primary">
-                Privacy Policy
-              </a>
-              .
+              {t('terms')}
             </p>
           </CardFooter>
         </Card>

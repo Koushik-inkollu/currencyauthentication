@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, Outlet } from "react-router-dom";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { AuthProvider, useAuth } from "@/providers/AuthProvider";
+import { LanguageProvider } from "@/providers/LanguageProvider";
 import CurrencyAuth from "./pages/CurrencyAuth"; 
 import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
@@ -53,27 +54,29 @@ function App() {
     <BrowserRouter>
       <ThemeProvider defaultTheme="system">
         <AuthProvider>
-          <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <Routes>
-                {/* Public routes that redirect to home if logged in */}
-                <Route element={<PublicOnlyRoute />}>
-                  <Route path="/auth" element={<Auth />} />
-                </Route>
+          <LanguageProvider>
+            <QueryClientProvider client={queryClient}>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <Routes>
+                  {/* Public routes that redirect to home if logged in */}
+                  <Route element={<PublicOnlyRoute />}>
+                    <Route path="/auth" element={<Auth />} />
+                  </Route>
 
-                {/* Protected routes that require authentication */}
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/currency-auth" element={<CurrencyAuth />} />
-                </Route>
+                  {/* Protected routes that require authentication */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/currency-auth" element={<CurrencyAuth />} />
+                  </Route>
 
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </TooltipProvider>
-          </QueryClientProvider>
+                  {/* Catch-all route */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </TooltipProvider>
+            </QueryClientProvider>
+          </LanguageProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

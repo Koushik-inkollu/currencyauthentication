@@ -1,95 +1,54 @@
 
 import React from 'react';
-import { ModeToggle } from './ModeToggle';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Shield, IndianRupee, User, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
-import { Button } from './ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { ModeToggle } from '@/components/ModeToggle';
+import LanguageSelector from '@/components/LanguageSelector';
+import { LogOut, Shield, User } from 'lucide-react';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 const NavBar = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { user, signOut, loading } = useAuth();
-  const { toast } = useToast();
-  
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-  
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast({
-        title: "Signed out successfully",
-        description: "You have been logged out of your account.",
-      });
-      // Redirect to auth page will be handled by ProtectedRoute
-    } catch (error) {
-      console.error("Sign out error:", error);
-      toast({
-        title: "Sign out failed",
-        description: "There was a problem signing out. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-  
+  const { user, logout, loading } = useAuth();
+  const { t } = useLanguage();
+
   return (
-    <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+    <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link to="/" className="text-xl font-bold flex items-center gap-2 transition-transform hover:scale-105">
-            <div className="relative">
-              <Shield className="h-6 w-6 text-primary" />
-              <IndianRupee className="h-3.5 w-3.5 text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-            </div>
-            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">CurrencyGuard</span>
+        <div className="flex items-center gap-6 md:gap-10">
+          <Link to="/" className="flex items-center space-x-2 font-bold text-xl">
+            <Shield className="h-6 w-6" />
+            <span className="hidden md:inline-block">CurrencyGuard</span>
           </Link>
-          <nav className="hidden md:flex gap-6">
-            <Link 
-              to="/currency-auth" 
-              className={`text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                isActive('/currency-auth') 
-                  ? 'text-primary' 
-                  : 'text-foreground/80 hover:text-primary'
-              }`}
-            >
-              <Shield className="h-4 w-4" />
-              Currency Authentication
-            </Link>
-          </nav>
         </div>
-        <div className="flex items-center gap-4">
-          {!loading && (
-            <>
-              {user ? (
-                <div className="flex items-center gap-4">
-                  <span className="text-sm hidden md:inline-block">
-                    {user.email}
-                  </span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleSignOut}
-                    className="flex items-center gap-2"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span className="hidden sm:inline">Sign out</span>
+        <nav className="flex items-center gap-2">
+          <div className="flex items-center space-x-2">
+            <LanguageSelector />
+            <ModeToggle />
+            {!loading && (
+              user ? (
+                <div className="flex items-center gap-2">
+                  <Link to="/currency-auth">
+                    <Button variant="outline" size="sm" className="hidden md:flex">
+                      <Shield className="mr-2 h-4 w-4" />
+                      {t('currencyAuth')}
+                    </Button>
+                  </Link>
+                  <Button onClick={logout} variant="ghost" size="icon" className="text-muted-foreground">
+                    <LogOut className="h-5 w-5" />
                   </Button>
                 </div>
               ) : (
-                <Button asChild variant="outline" size="sm" className="flex items-center gap-2">
-                  <Link to="/auth">
+                <Link to="/auth">
+                  <Button variant="default" size="sm" className="gap-1">
                     <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">Sign in</span>
-                  </Link>
-                </Button>
-              )}
-            </>
-          )}
-          <ModeToggle />
-        </div>
+                    <span>{t('login')}</span>
+                  </Button>
+                </Link>
+              )
+            )}
+          </div>
+        </nav>
       </div>
     </header>
   );
