@@ -5,10 +5,13 @@ import KeyphraseGenerator from '@/components/KeyphraseGenerator';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/providers/AuthProvider';
-import { User, Shield } from 'lucide-react';
+import { useLanguage } from '@/providers/LanguageProvider';
+import LanguageSelector from '@/components/LanguageSelector';
+import { User, Shield, IndianRupee } from 'lucide-react';
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -16,12 +19,15 @@ const Index = () => {
       <main className="flex-1">
         <div className="container py-8">
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold mb-2">AI-Powered Tools Collection</h1>
-            <p className="text-muted-foreground">Explore our suite of AI tools to boost your productivity</p>
+            <h1 className="text-3xl font-bold mb-2">{t('appTitle')}</h1>
+            <p className="text-muted-foreground">{t('appSubtitle')}</p>
             
             <div className="flex flex-wrap gap-4 justify-center mt-6">
               <Button asChild>
-                <Link to="/currency-auth">₹500 Currency Authentication</Link>
+                <Link to="/currency-auth" className="flex items-center gap-2">
+                  <IndianRupee className="h-4 w-4" />
+                  {t('currencyAuth')}
+                </Link>
               </Button>
               
               {!loading && (
@@ -29,18 +35,22 @@ const Index = () => {
                   <Button asChild variant="outline">
                     <Link to="/auth" className="flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      Sign in / Register
+                      {t('signInRegister')}
                     </Link>
                   </Button>
                 ) : (
                   <Button asChild variant="secondary">
                     <Link to="/currency-auth" className="flex items-center gap-2">
                       <Shield className="h-4 w-4" />
-                      My Dashboard
+                      {t('myDashboard')}
                     </Link>
                   </Button>
                 )
               )}
+            </div>
+            
+            <div className="mt-6 flex justify-center">
+              <LanguageSelector />
             </div>
           </div>
         </div>
@@ -48,7 +58,7 @@ const Index = () => {
       </main>
       <footer className="py-6 border-t">
         <div className="container text-center text-sm text-muted-foreground">
-          <p>KeyPhrase Creator &copy; {new Date().getFullYear()} - Generate effective keyphrases for your content</p>
+          <p>{t('copyright', { year: new Date().getFullYear() })}</p>
         </div>
       </footer>
     </div>

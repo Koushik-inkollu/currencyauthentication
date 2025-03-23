@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { preprocessImage, analyzeCurrencyNote } from '@/utils/currencyAuthentication';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 const CurrencyAuthenticator = () => {
   const [image, setImage] = useState<string | null>(null);
@@ -34,6 +35,7 @@ const CurrencyAuthenticator = () => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const sectionRefs = useRef<{ [key: string]: React.RefObject<HTMLDivElement> }>({});
+  const { t } = useLanguage();
 
   useEffect(() => {
     sectionRefs.current = {
@@ -278,9 +280,11 @@ const CurrencyAuthenticator = () => {
         <div className="space-y-3">
           <h1 className="text-4xl font-bold tracking-tight flex items-center">
             <span className="rupee-pulse inline-block mr-2"><IndianRupee className="h-8 w-8 text-primary" /></span>
-            500 Currency Authentication
+            {t('currencyAuth')}
           </h1>
-          <p className="text-xl text-muted-foreground">Upload or capture a ₹500 note to verify its authenticity using our advanced AI system</p>
+          <p className="text-xl text-muted-foreground">
+            {t('uploadDescription')}
+          </p>
           
           <div className="mt-6">
             <Button 
@@ -288,7 +292,7 @@ const CurrencyAuthenticator = () => {
               size="lg"
               onClick={() => document.getElementById('uploadSection')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Start Authentication
+              {t('startAuth')}
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
@@ -303,11 +307,11 @@ const CurrencyAuthenticator = () => {
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="upload" className="btn-3d">
                 <Upload className="mr-2 h-4 w-4" />
-                Upload Image
+                {t('uploadImage')}
               </TabsTrigger>
               <TabsTrigger value="camera" onClick={startCamera} className="btn-3d">
                 <Camera className="mr-2 h-4 w-4" />
-                Use Camera
+                {t('useCamera')}
               </TabsTrigger>
             </TabsList>
             
@@ -316,10 +320,10 @@ const CurrencyAuthenticator = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Upload className="mr-2 h-5 w-5 text-primary" />
-                    Upload a ₹500 Note Image
+                    {t('uploadNote')}
                   </CardTitle>
                   <CardDescription>
-                    Choose a clear, well-lit image of the full ₹500 note for best results
+                    {t('uploadDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -337,7 +341,7 @@ const CurrencyAuthenticator = () => {
                     <div className="glassmorphism p-4 rounded-full mb-4">
                       <Upload className="h-10 w-10 text-primary" />
                     </div>
-                    <p className="text-center text-muted-foreground mb-2">Drag and drop your file here or click to browse</p>
+                    <p className="text-center text-muted-foreground mb-2">{t('dragDrop')}</p>
                     <p className="text-xs text-muted-foreground">Supports JPG, PNG, HEIC</p>
                   </div>
                   {image && (
@@ -358,12 +362,12 @@ const CurrencyAuthenticator = () => {
                     {isProcessing ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Analyzing...
+                        {t('analyzing')}
                       </>
                     ) : (
                       <>
                         <Search className="mr-2 h-4 w-4" />
-                        Analyze Image
+                        {t('analyzeImage')}
                       </>
                     )}
                   </Button>
@@ -376,10 +380,10 @@ const CurrencyAuthenticator = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Camera className="mr-2 h-5 w-5 text-primary" />
-                    Capture a ₹500 Note Image
+                    {t('captureNote')}
                   </CardTitle>
                   <CardDescription>
-                    Position the note clearly in the frame and ensure good lighting
+                    {t('captureDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -406,7 +410,7 @@ const CurrencyAuthenticator = () => {
                       className="w-full auth-button"
                     >
                       <Camera className="mr-2 h-4 w-4" />
-                      Capture Image
+                      {t('captureImage')}
                     </Button>
                   ) : (
                     <div className="flex flex-col w-full gap-2">
@@ -415,7 +419,7 @@ const CurrencyAuthenticator = () => {
                         variant="outline" 
                         className="w-full btn-3d"
                       >
-                        Retake Photo
+                        {t('retakePhoto')}
                       </Button>
                       <Button 
                         onClick={analyzeImage}
@@ -425,12 +429,12 @@ const CurrencyAuthenticator = () => {
                         {isProcessing ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Analyzing...
+                            {t('analyzing')}
                           </>
                         ) : (
                           <>
                             <Search className="mr-2 h-4 w-4" />
-                            Analyze Image
+                            {t('analyzeImage')}
                           </>
                         )}
                       </Button>
@@ -452,7 +456,7 @@ const CurrencyAuthenticator = () => {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Shield className="mr-2 h-5 w-5 text-primary" />
-                  Authentication Results
+                  {t('authResults')}
                 </CardTitle>
                 <CardDescription>
                   Analysis of the ₹500 note security features
@@ -462,31 +466,31 @@ const CurrencyAuthenticator = () => {
                 {result.authentic ? (
                   <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900/30">
                     <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                    <AlertTitle className="text-green-800 dark:text-green-400">Genuine Currency</AlertTitle>
+                    <AlertTitle className="text-green-800 dark:text-green-400">{t('genuine')}</AlertTitle>
                     <AlertDescription className="text-green-700 dark:text-green-500">
-                      The analyzed note appears to be genuine with {Math.round(result.confidence * 100)}% confidence.
+                      {t('genuineDesc', { confidence: Math.round(result.confidence * 100) })}
                     </AlertDescription>
                   </Alert>
                 ) : result.confidence >= 0.65 ? (
                   <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-900/30">
                     <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                    <AlertTitle className="text-yellow-800 dark:text-yellow-400">Suspicious Currency</AlertTitle>
+                    <AlertTitle className="text-yellow-800 dark:text-yellow-400">{t('suspicious')}</AlertTitle>
                     <AlertDescription className="text-yellow-700 dark:text-yellow-500">
-                      Some security features could not be verified. Recommend physical verification.
+                      {t('suspiciousDesc')}
                     </AlertDescription>
                   </Alert>
                 ) : (
                   <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900/30">
                     <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                    <AlertTitle className="text-red-800 dark:text-red-400">Likely Counterfeit</AlertTitle>
+                    <AlertTitle className="text-red-800 dark:text-red-400">{t('counterfeit')}</AlertTitle>
                     <AlertDescription className="text-red-700 dark:text-red-500">
-                      Several security features are missing or don't match genuine currency patterns.
+                      {t('counterfeitDesc')}
                     </AlertDescription>
                   </Alert>
                 )}
 
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Security Features</h3>
+                  <h3 className="text-lg font-medium">{t('securityFeatures')}</h3>
                   <ul className="space-y-2">
                     {Object.entries(result.features).map(([key, value]: [string, any], index) => (
                       <li key={index} className="flex items-center justify-between p-3 rounded-md bg-muted/50 feature-card">
@@ -499,17 +503,17 @@ const CurrencyAuthenticator = () => {
                             value ? (
                               <span className="text-green-600 dark:text-green-400 font-medium flex items-center">
                                 <CheckCircle className="h-4 w-4 mr-1" />
-                                Present
+                                {t('present')}
                               </span>
                             ) : (
                               <span className="text-red-600 dark:text-red-400 font-medium flex items-center">
                                 <AlertTriangle className="h-4 w-4 mr-1" />
-                                Not Detected
+                                {t('notDetected')}
                               </span>
                             )
                           ) : typeof value === 'number' ? (
                             <span className={`font-medium ${value > 0.7 ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
-                              {Math.round(value * 100)}% match
+                              {t('match', { percent: Math.round(value * 100) })}
                             </span>
                           ) : (
                             value
@@ -521,7 +525,7 @@ const CurrencyAuthenticator = () => {
                 </div>
 
                 <div className="mt-4">
-                  <h3 className="text-lg font-medium mb-2">Analysis Confidence</h3>
+                  <h3 className="text-lg font-medium mb-2">{t('analysisConfidence')}</h3>
                   <div className="p-4 bg-muted/50 rounded-lg">
                     <p className="mb-2"><strong>Overall confidence:</strong> {Math.round(result.confidence * 100)}%</p>
                     
@@ -556,7 +560,7 @@ const CurrencyAuthenticator = () => {
                   variant="outline"
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Download Report
+                  {t('downloadReport')}
                 </Button>
 
                 <Button 
@@ -567,7 +571,7 @@ const CurrencyAuthenticator = () => {
                     setResult(null);
                   }}
                 >
-                  Analyze Another Note
+                  {t('anotherNote')}
                 </Button>
               </CardFooter>
             </Card>
@@ -795,148 +799,4 @@ const CurrencyAuthenticator = () => {
                     </p>
                   </div>
                   
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">7</span>
-                      Optically Variable Ink
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      The numeral ₹500 on the bottom right changes from green to blue when the note is tilted.
-                    </p>
-                  </div>
-                  
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">8</span>
-                      Latent Image
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Numeral '500' hidden within the vertical band, visible when the note is held at a 45° angle at eye level.
-                    </p>
-                  </div>
-                  
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">9</span>
-                      Ascending Size Numbers
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      The size of numerals in the number panel increases from left to right.
-                    </p>
-                  </div>
-                  
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">10</span>
-                      Devanagari '५००'
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      The denomination in Devanagari script on the note.
-                    </p>
-                  </div>
-                  
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">11</span>
-                      Identification Mark
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      A circle with ₹500 in raised print on the right side, designed to help visually impaired people identify the denomination.
-                    </p>
-                  </div>
-                  
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">12</span>
-                      Year of Printing
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      The year of printing on the reverse of the note.
-                    </p>
-                  </div>
-                  
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">13</span>
-                      Language Panel
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      The denomination of the note written in 15 languages on the reverse.
-                    </p>
-                  </div>
-                  
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">14</span>
-                      Governor's Signature
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Signature of the RBI Governor printed with intaglio effect.
-                    </p>
-                  </div>
-                  
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">15</span>
-                      Watermark Window
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      The blank space for the watermark of Mahatma Gandhi portrait and electrotype mark.
-                    </p>
-                  </div>
-                  
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">16</span>
-                      Red Fort Image
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Depicts the Red Fort with the Indian flag, symbolizing national heritage.
-                    </p>
-                  </div>
-                  
-                  <div className="feature-card p-4 rounded-lg bg-muted/30 border">
-                    <h4 className="font-bold mb-2 flex items-center">
-                      <span className="number-marker">17</span>
-                      Ashoka Pillar Emblem
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      The national emblem of India printed on the right side.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-muted p-6 rounded-lg mt-4">
-                <h3 className="font-medium mb-3 flex items-center">
-                  <Eye className="mr-2 h-5 w-5 text-primary" />
-                  How to Verify a ₹500 Note
-                </h3>
-                <ol className="space-y-3 list-decimal pl-5">
-                  <li className="text-sm"><strong>Visual Inspection:</strong> Examine the overall print quality. Authentic notes have sharp, clear printing without smudges or blurred edges.</li>
-                  <li className="text-sm"><strong>Feel the Note:</strong> Authentic notes have a distinct texture due to intaglio printing. Counterfeit notes often feel smoother or different.</li>
-                  <li className="text-sm"><strong>Check in Light:</strong> Hold the note against light to check for the watermark, security thread, and see-through register.</li>
-                  <li className="text-sm"><strong>Tilt the Note:</strong> Observe color changes in the security features, particularly the color-shifting ink on the ₹500 numeral.</li>
-                  <li className="text-sm"><strong>Magnify:</strong> Use a magnifying glass to check for microlettering and fine details that are difficult to replicate in counterfeits.</li>
-                  <li className="text-sm"><strong>UV Light Test:</strong> Under UV light, specific portions of genuine notes will glow while counterfeits typically show different patterns.</li>
-                </ol>
-              </div>
-            </CardContent>
-            
-            <CardFooter className="flex justify-center">
-              <Button 
-                className="auth-button"
-                onClick={() => document.getElementById('uploadSection')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                Start Authentication Now
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default CurrencyAuthenticator;
+                  <div className="feature-card p-4
