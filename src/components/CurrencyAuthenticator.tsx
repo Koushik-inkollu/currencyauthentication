@@ -20,18 +20,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { preprocessImage, analyzeCurrencyNote } from '@/utils/currencyAuthentication';
-import { useEffect } from 'react';
-import { useLanguage } from '@/providers/LanguageProvider';
 
 const CurrencyAuthenticator = () => {
-  const { t, language } = useLanguage();
-  
-  useEffect(() => {
-    console.log('Current language:', language);
-    console.log('Translation test:', t('currencyAuth'));
-    console.log('Translation test upload:', t('uploadDescription'));
-  }, [language, t]);
-  
   const [image, setImage] = useState<string | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);

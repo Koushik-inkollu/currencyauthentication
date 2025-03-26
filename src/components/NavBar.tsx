@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/providers/AuthProvider';
@@ -10,13 +10,7 @@ import { useLanguage } from '@/providers/LanguageProvider';
 
 const NavBar = () => {
   const { user, signOut, loading } = useAuth();
-  const { t, language } = useLanguage();
-  
-  useEffect(() => {
-    console.log('NavBar - Current language:', language);
-    console.log('NavBar - Login translation:', t('login'));
-    console.log('NavBar - Currency Auth translation:', t('currencyAuth'));
-  }, [language, t]);
+  const { t } = useLanguage();
 
   return (
     <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
