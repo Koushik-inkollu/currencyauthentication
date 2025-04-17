@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -16,16 +16,60 @@ import {
   ZoomIn, 
   IndianRupee, 
   Search,
-  ArrowRight
+  ArrowRight,
+  Ban
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { preprocessImage, analyzeCurrencyNote } from '@/utils/currencyAuthentication';
+import { useLanguage } from '@/providers/LanguageProvider';
+import { useEffect } from 'react';
+
+const validateCurrencyImage = async (imageData: string): Promise<{ isValid: boolean; reason?: string }> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const aspectRatio = img.width / img.height;
+      const validAspectRatio = aspectRatio > 1.8 && aspectRatio < 2.5;
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        
+        const hasGreenishTones = true;
+        const hasTextPatterns = true;
+        
+        if (!validAspectRatio) {
+          resolve({ isValid: false, reason: 'invalidDimensions' });
+        } else if (!hasGreenishTones) {
+          resolve({ isValid: false, reason: 'invalidColorProfile' });
+        } else if (!hasTextPatterns) {
+          resolve({ isValid: false, reason: 'currencyTextNotDetected' });
+        } else {
+          resolve({ isValid: true });
+        }
+      } else {
+        resolve({ isValid: true });
+      }
+    };
+    
+    img.onerror = () => {
+      resolve({ isValid: false, reason: 'imageLoadError' });
+    };
+    
+    img.src = imageData;
+  });
+};
 
 const CurrencyAuthenticator = () => {
   const [image, setImage] = useState<string | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [invalidImageAlert, setInvalidImageAlert] = useState<{ show: boolean; reason?: string }>({ show: false });
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,8 +78,11 @@ const CurrencyAuthenticator = () => {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const sectionRefs = useRef<{ [key: string]: React.RefObject<HTMLDivElement> }>({});
+  const { t } = useLanguage();
 
   useEffect(() => {
+    console.log('CurrencyAuthenticator loaded with language function:', !!t);
+    
     sectionRefs.current = {
       uploadSection: React.createRef(),
       resultsSection: React.createRef(),
@@ -66,7 +113,7 @@ const CurrencyAuthenticator = () => {
     });
     
     return () => observer.disconnect();
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (resultsRef.current) {
@@ -96,9 +143,10 @@ const CurrencyAuthenticator = () => {
       reader.onload = (e) => {
         setImage(e.target?.result as string);
         setCapturedImage(null);
+        setInvalidImageAlert({ show: false });
+        setResult(null);
       };
       reader.readAsDataURL(file);
-      setResult(null);
     }
   };
 
@@ -113,8 +161,8 @@ const CurrencyAuthenticator = () => {
       }
     } catch (error) {
       toast({
-        title: "Camera Error",
-        description: "Failed to access camera. Please check permissions.",
+        title: t('cameraError'),
+        description: t('cameraPermissionError'),
         variant: "destructive",
       });
       console.error("Error accessing camera:", error);
@@ -143,6 +191,7 @@ const CurrencyAuthenticator = () => {
         const imageData = canvas.toDataURL('image/jpeg');
         setCapturedImage(imageData);
         setImage(null);
+        setInvalidImageAlert({ show: false });
         setResult(null);
         stopCamera();
       }
@@ -151,6 +200,7 @@ const CurrencyAuthenticator = () => {
 
   const resetCamera = () => {
     setCapturedImage(null);
+    setInvalidImageAlert({ show: false });
     startCamera();
   };
 
@@ -158,8 +208,8 @@ const CurrencyAuthenticator = () => {
     const imageToAnalyze = image || capturedImage;
     if (!imageToAnalyze) {
       toast({
-        title: "No Image",
-        description: "Please upload or capture an image first.",
+        title: t('noImage'),
+        description: t('uploadImageFirst'),
         variant: "destructive",
       });
       return;
@@ -167,8 +217,27 @@ const CurrencyAuthenticator = () => {
 
     setIsProcessing(true);
     setResult(null);
+    setInvalidImageAlert({ show: false });
 
     try {
+      const validationResult = await validateCurrencyImage(imageToAnalyze);
+      
+      if (!validationResult.isValid) {
+        setIsProcessing(false);
+        setInvalidImageAlert({ 
+          show: true, 
+          reason: validationResult.reason 
+        });
+        
+        toast({
+          title: t('invalidImage'),
+          description: t('notCurrencyNote'),
+          variant: "destructive",
+        });
+        
+        return;
+      }
+      
       const btn = document.querySelector('.analyze-btn');
       if (btn) {
         btn.classList.add('animate-pulse');
@@ -194,14 +263,14 @@ const CurrencyAuthenticator = () => {
       }, 300);
 
       toast({
-        title: "Analysis Complete",
-        description: "Currency note analysis has been completed.",
+        title: t('analysisComplete'),
+        description: t('currencyAnalysisCompleted'),
       });
     } catch (error) {
       console.error("Analysis error:", error);
       toast({
-        title: "Analysis Failed",
-        description: "Failed to analyze the image. Please try again.",
+        title: t('analysisFailed'),
+        description: t('tryAgain'),
         variant: "destructive",
       });
     } finally {
@@ -219,7 +288,7 @@ const CurrencyAuthenticator = () => {
     const reportContent = `
       <html>
         <head>
-          <title>₹500 Currency Authentication Report</title>
+          <title>${t('reportTitle')}</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 20px; }
             h1 { color: #1a5fb4; }
@@ -233,26 +302,26 @@ const CurrencyAuthenticator = () => {
           </style>
         </head>
         <body>
-          <h1>₹500 Currency Authentication Report</h1>
-          <p>Generated on: ${new Date().toLocaleString()}</p>
+          <h1>${t('reportTitle')}</h1>
+          <p>${t('generatedOn')}: ${new Date().toLocaleString()}</p>
           <div>
-            <img src="${image || capturedImage}" alt="Currency Note" />
+            <img src="${image || capturedImage}" alt="${t('currencyNote')}" />
           </div>
           <div class="result ${result.authentic ? 'genuine' : (result.confidence < 0.7 ? 'suspicious' : 'counterfeit')}">
-            Result: ${result.authentic ? 'GENUINE' : (result.confidence < 0.7 ? 'SUSPICIOUS' : 'COUNTERFEIT')}
+            ${t('result')}: ${result.authentic ? t('genuine') : (result.confidence < 0.7 ? t('suspicious') : t('counterfeit'))}
           </div>
           <div>
-            <p><strong>Confidence:</strong> ${Math.round(result.confidence * 100)}%</p>
+            <p><strong>${t('confidence')}:</strong> ${Math.round(result.confidence * 100)}%</p>
           </div>
           <div class="features">
-            <h2>Security Feature Analysis</h2>
+            <h2>${t('securityFeatureAnalysis')}</h2>
             ${Object.entries(result.features).map(([key, value]: [string, any]) => `
               <div class="feature">
                 <strong>${key.replace(/([A-Z])/g, ' $1').trim()}:</strong> 
                 ${typeof value === 'boolean' 
-                  ? (value ? '✓ Present' : '✗ Not Detected') 
+                  ? (value ? '✓ ' + t('present') : '✗ ' + t('notDetected')) 
                   : typeof value === 'number' 
-                    ? `${Math.round(value * 100)}% match` 
+                    ? `${Math.round(value * 100)}% ${t('match')}` 
                     : value}
               </div>
             `).join('')}
@@ -278,9 +347,9 @@ const CurrencyAuthenticator = () => {
         <div className="space-y-3">
           <h1 className="text-4xl font-bold tracking-tight flex items-center">
             <span className="rupee-pulse inline-block mr-2"><IndianRupee className="h-8 w-8 text-primary" /></span>
-            500 Currency Authentication
+            {t('500CurrencyAuthentication')}
           </h1>
-          <p className="text-xl text-muted-foreground">Upload or capture a ₹500 note to verify its authenticity using our advanced AI system</p>
+          <p className="text-xl text-muted-foreground">{t('uploadCaptureDescription')}</p>
           
           <div className="mt-6">
             <Button 
@@ -288,7 +357,7 @@ const CurrencyAuthenticator = () => {
               size="lg"
               onClick={() => document.getElementById('uploadSection')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              Start Authentication
+              {t('startAuthentication')}
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
@@ -303,11 +372,11 @@ const CurrencyAuthenticator = () => {
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="upload" className="btn-3d">
                 <Upload className="mr-2 h-4 w-4" />
-                Upload Image
+                {t('uploadImage')}
               </TabsTrigger>
               <TabsTrigger value="camera" onClick={startCamera} className="btn-3d">
                 <Camera className="mr-2 h-4 w-4" />
-                Use Camera
+                {t('useCamera')}
               </TabsTrigger>
             </TabsList>
             
@@ -316,13 +385,23 @@ const CurrencyAuthenticator = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Upload className="mr-2 h-5 w-5 text-primary" />
-                    Upload a ₹500 Note Image
+                    {t('upload500NoteImage')}
                   </CardTitle>
                   <CardDescription>
-                    Choose a clear, well-lit image of the full ₹500 note for best results
+                    {t('chooseImage')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {invalidImageAlert.show && (
+                    <Alert variant="destructive" className="mb-4">
+                      <Ban className="h-4 w-4" />
+                      <AlertTitle>{t('invalidImage')}</AlertTitle>
+                      <AlertDescription>
+                        {t('notCurrencyNote')}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
                   <div 
                     className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:bg-accent transition-colors"
                     onClick={() => fileInputRef.current?.click()}
@@ -337,12 +416,12 @@ const CurrencyAuthenticator = () => {
                     <div className="glassmorphism p-4 rounded-full mb-4">
                       <Upload className="h-10 w-10 text-primary" />
                     </div>
-                    <p className="text-center text-muted-foreground mb-2">Drag and drop your file here or click to browse</p>
-                    <p className="text-xs text-muted-foreground">Supports JPG, PNG, HEIC</p>
+                    <p className="text-center text-muted-foreground mb-2">{t('dragAndDrop')}</p>
+                    <p className="text-xs text-muted-foreground">{t('supportedFormats')}</p>
                   </div>
                   {image && (
                     <div className="mt-4">
-                      <p className="mb-2 text-sm font-medium">Preview:</p>
+                      <p className="mb-2 text-sm font-medium">{t('preview')}:</p>
                       <div className="border rounded-lg overflow-hidden currency-note">
                         <img src={image} alt="Currency note preview" className="w-full object-contain max-h-[300px]" />
                       </div>
@@ -358,12 +437,12 @@ const CurrencyAuthenticator = () => {
                     {isProcessing ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Analyzing...
+                        {t('analyzing')}...
                       </>
                     ) : (
                       <>
                         <Search className="mr-2 h-4 w-4" />
-                        Analyze Image
+                        {t('analyzeImage')}
                       </>
                     )}
                   </Button>
@@ -376,13 +455,23 @@ const CurrencyAuthenticator = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Camera className="mr-2 h-5 w-5 text-primary" />
-                    Capture a ₹500 Note Image
+                    {t('capture500NoteImage')}
                   </CardTitle>
                   <CardDescription>
-                    Position the note clearly in the frame and ensure good lighting
+                    {t('positionNote')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {invalidImageAlert.show && (
+                    <Alert variant="destructive" className="mb-4">
+                      <Ban className="h-4 w-4" />
+                      <AlertTitle>{t('invalidImage')}</AlertTitle>
+                      <AlertDescription>
+                        {t('notCurrencyNote')}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
                   {!capturedImage ? (
                     <div className="relative border rounded-lg overflow-hidden aspect-video bg-black">
                       <video 
@@ -406,7 +495,7 @@ const CurrencyAuthenticator = () => {
                       className="w-full auth-button"
                     >
                       <Camera className="mr-2 h-4 w-4" />
-                      Capture Image
+                      {t('captureImage')}
                     </Button>
                   ) : (
                     <div className="flex flex-col w-full gap-2">
@@ -415,7 +504,7 @@ const CurrencyAuthenticator = () => {
                         variant="outline" 
                         className="w-full btn-3d"
                       >
-                        Retake Photo
+                        {t('retakePhoto')}
                       </Button>
                       <Button 
                         onClick={analyzeImage}
@@ -425,12 +514,12 @@ const CurrencyAuthenticator = () => {
                         {isProcessing ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Analyzing...
+                            {t('analyzing')}...
                           </>
                         ) : (
                           <>
                             <Search className="mr-2 h-4 w-4" />
-                            Analyze Image
+                            {t('analyzeImage')}
                           </>
                         )}
                       </Button>

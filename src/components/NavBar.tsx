@@ -11,6 +11,8 @@ import { useLanguage } from '@/providers/LanguageProvider';
 const NavBar = () => {
   const { user, signOut, loading } = useAuth();
   const { t } = useLanguage();
+  
+  console.log('NavBar rendering with language function:', !!t);
 
   return (
     <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

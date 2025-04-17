@@ -7,6 +7,7 @@ import { useLanguage, Language } from '@/providers/LanguageProvider';
 
 export const LanguageSelector = () => {
   const { language, setLanguage, t } = useLanguage();
+  console.log('Current language in LanguageSelector:', language);
 
   const languages = [
     { code: 'en', name: t('english') },
@@ -17,6 +18,11 @@ export const LanguageSelector = () => {
     { code: 'ta', name: t('tamil') },
   ];
 
+  const handleLanguageChange = (langCode: Language) => {
+    console.log('Changing language to:', langCode);
+    setLanguage(langCode);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -25,12 +31,12 @@ export const LanguageSelector = () => {
           <span className="sr-only">{t('selectLanguage')}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-background border-border">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => setLanguage(lang.code as Language)}
-            className="flex items-center justify-between"
+            onClick={() => handleLanguageChange(lang.code as Language)}
+            className="flex items-center justify-between cursor-pointer"
           >
             <span>{lang.name}</span>
             {language === lang.code && <Check className="h-4 w-4 ml-2" />}

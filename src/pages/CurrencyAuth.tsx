@@ -9,6 +9,8 @@ const CurrencyAuth = () => {
   const { t } = useLanguage();
   
   useEffect(() => {
+    console.log('CurrencyAuth page loaded with language function:', !!t);
+    
     // Setup fade-in animations when components come into view
     const observer = setupFadeInObserver();
     
@@ -37,7 +39,7 @@ const CurrencyAuth = () => {
       }
       mutationObserver.disconnect();
     };
-  }, []);
+  }, [t]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
