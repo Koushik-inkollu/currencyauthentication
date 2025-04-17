@@ -501,7 +501,7 @@ const CurrencyAuthenticator = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {invalidImageAlert.show && (
-                    <Alert variant={invalidImageAlert.isPartial ? "warning" : "destructive"} className="mb-4">
+                    <Alert variant="warning" className="mb-4">
                       {invalidImageAlert.isPartial ? (
                         <AlertTriangle className="h-4 w-4" />
                       ) : (
@@ -626,7 +626,7 @@ const CurrencyAuthenticator = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {invalidImageAlert.show && (
-                    <Alert variant={invalidImageAlert.isPartial ? "warning" : "destructive"} className="mb-4">
+                    <Alert variant="warning" className="mb-4">
                       {invalidImageAlert.isPartial ? (
                         <AlertTriangle className="h-4 w-4" />
                       ) : (
