@@ -23,8 +23,8 @@ const NavBar = () => {
             <span className="hidden md:inline-block">CurrencyGuard</span>
           </Link>
         </div>
-        <nav className="flex items-center gap-2">
-          <div className="flex items-center space-x-2">
+        <nav className="flex items-center gap-3">
+          <div className="flex items-center space-x-3">
             <LanguageSelector />
             <ModeToggle />
             {!loading && (

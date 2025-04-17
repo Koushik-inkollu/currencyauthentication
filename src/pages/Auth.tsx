@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,7 +25,6 @@ const Auth = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  // Get the page user tried to visit before being redirected to login
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/';
 
   const validateEmail = (email: string) => {
@@ -36,6 +34,11 @@ const Auth = () => {
   const validatePassword = (password: string) => {
     return password.length >= 6;
   };
+
+  useEffect(() => {
+    console.log('Auth page loaded with language function:', !!t);
+    document.title = t('loginSignupTitle');
+  }, [t]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +103,6 @@ const Auth = () => {
         title: "Login successful!",
         description: "You have been logged in.",
       });
-      // Redirect to the page they tried to visit or homepage
       navigate(from, { replace: true });
     } catch (error: any) {
       setError(error.message);

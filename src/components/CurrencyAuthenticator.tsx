@@ -17,46 +17,137 @@ import {
   IndianRupee, 
   Search,
   ArrowRight,
-  Ban
+  Ban,
+  FileCog
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { preprocessImage, analyzeCurrencyNote } from '@/utils/currencyAuthentication';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useEffect } from 'react';
+import * as Tesseract from 'tesseract.js';
 
-const validateCurrencyImage = async (imageData: string): Promise<{ isValid: boolean; reason?: string }> => {
-  return new Promise((resolve) => {
+const validateCurrencyImage = async (imageData: string): Promise<{ 
+  isValid: boolean; 
+  confidence: number; 
+  reason?: string;
+  isPartial?: boolean;
+  detectedFeatures: string[];
+}> => {
+  return new Promise(async (resolve) => {
     const img = new Image();
-    img.onload = () => {
+    
+    img.onload = async () => {
       const aspectRatio = img.width / img.height;
       const validAspectRatio = aspectRatio > 1.8 && aspectRatio < 2.5;
       
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
+      
       if (ctx) {
         canvas.width = img.width;
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
         
-        const hasGreenishTones = true;
-        const hasTextPatterns = true;
+        let confidence = 0;
         
-        if (!validAspectRatio) {
-          resolve({ isValid: false, reason: 'invalidDimensions' });
-        } else if (!hasGreenishTones) {
-          resolve({ isValid: false, reason: 'invalidColorProfile' });
-        } else if (!hasTextPatterns) {
-          resolve({ isValid: false, reason: 'currencyTextNotDetected' });
-        } else {
-          resolve({ isValid: true });
+        if (validAspectRatio) {
+          confidence += 0.2;
+        }
+        
+        try {
+          const result = await Tesseract.recognize(
+            imageData,
+            'eng+hin',
+            { 
+              logger: m => console.log(m),
+            }
+          );
+          
+          console.log("OCR Result:", result.data.text);
+          
+          const text = result.data.text.toLowerCase();
+          const detectedFeatures = [];
+          
+          if (text.includes('500') || text.includes('₹500') || text.includes('rs 500') || text.includes('rs.500')) {
+            confidence += 0.2;
+            detectedFeatures.push('denomination');
+          }
+          
+          if (text.includes('rbi') || text.includes('reserve bank')) {
+            confidence += 0.15;
+            detectedFeatures.push('rbi text');
+          }
+          
+          if (text.includes('भारत') || text.includes('india') || text.includes('bharat')) {
+            confidence += 0.15;
+            detectedFeatures.push('country name');
+          }
+          
+          if (text.includes('governor') || text.includes('promise to pay')) {
+            confidence += 0.15;
+            detectedFeatures.push('promise text');
+          }
+          
+          const serialNumberRegex = /[a-zA-Z]{2,3}\s*\d{6,10}/g;
+          if (serialNumberRegex.test(text)) {
+            confidence += 0.15;
+            detectedFeatures.push('serial number');
+          }
+          
+          const isPartial = confidence >= 0.3 && confidence < 0.6;
+          
+          if (confidence >= 0.5 || detectedFeatures.length >= 2) {
+            resolve({ 
+              isValid: true, 
+              confidence, 
+              detectedFeatures,
+              isPartial: isPartial
+            });
+          } else {
+            resolve({ 
+              isValid: false, 
+              confidence,
+              reason: 'insufficientFeatures', 
+              detectedFeatures,
+              isPartial: isPartial
+            });
+          }
+          
+        } catch (error) {
+          console.error("OCR error:", error);
+          if (validAspectRatio) {
+            resolve({ 
+              isValid: true, 
+              confidence: 0.4,
+              detectedFeatures: ['aspect ratio'],
+              reason: 'ocrFailed'
+            });
+          } else {
+            resolve({ 
+              isValid: false, 
+              confidence: 0.2,
+              detectedFeatures: [],
+              reason: 'invalidDimensions' 
+            });
+          }
         }
       } else {
-        resolve({ isValid: true });
+        resolve({ 
+          isValid: false, 
+          confidence: 0,
+          detectedFeatures: [],
+          reason: 'canvasError' 
+        });
       }
     };
     
     img.onerror = () => {
-      resolve({ isValid: false, reason: 'imageLoadError' });
+      resolve({ 
+        isValid: false, 
+        confidence: 0,
+        detectedFeatures: [],
+        reason: 'imageLoadError' 
+      });
     };
     
     img.src = imageData;
@@ -68,7 +159,14 @@ const CurrencyAuthenticator = () => {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const [invalidImageAlert, setInvalidImageAlert] = useState<{ show: boolean; reason?: string }>({ show: false });
+  const [invalidImageAlert, setInvalidImageAlert] = useState<{ 
+    show: boolean; 
+    reason?: string; 
+    isPartial?: boolean;
+    confidence?: number;
+    detectedFeatures?: string[];
+  }>({ show: false });
+  const [proceedAnyway, setProceedAnyway] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -145,6 +243,7 @@ const CurrencyAuthenticator = () => {
         setCapturedImage(null);
         setInvalidImageAlert({ show: false });
         setResult(null);
+        setProceedAnyway(false);
       };
       reader.readAsDataURL(file);
     }
@@ -220,22 +319,31 @@ const CurrencyAuthenticator = () => {
     setInvalidImageAlert({ show: false });
 
     try {
-      const validationResult = await validateCurrencyImage(imageToAnalyze);
-      
-      if (!validationResult.isValid) {
-        setIsProcessing(false);
-        setInvalidImageAlert({ 
-          show: true, 
-          reason: validationResult.reason 
-        });
+      if (!proceedAnyway) {
+        console.log("Validating image with OCR...");
+        const validationResult = await validateCurrencyImage(imageToAnalyze);
+        console.log("Validation result:", validationResult);
         
-        toast({
-          title: t('invalidImage'),
-          description: t('notCurrencyNote'),
-          variant: "destructive",
-        });
-        
-        return;
+        if (!validationResult.isValid) {
+          setIsProcessing(false);
+          setInvalidImageAlert({ 
+            show: true, 
+            reason: validationResult.reason,
+            isPartial: validationResult.isPartial,
+            confidence: validationResult.confidence,
+            detectedFeatures: validationResult.detectedFeatures
+          });
+          
+          toast({
+            title: validationResult.isPartial ? t('partialCurrencyNote') : t('invalidImage'),
+            description: validationResult.isPartial 
+              ? t('partialCurrencyDescription') 
+              : t('notCurrencyNote'),
+            variant: "warning",
+          });
+          
+          return;
+        }
       }
       
       const btn = document.querySelector('.analyze-btn');
@@ -393,11 +501,66 @@ const CurrencyAuthenticator = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {invalidImageAlert.show && (
-                    <Alert variant="destructive" className="mb-4">
-                      <Ban className="h-4 w-4" />
-                      <AlertTitle>{t('invalidImage')}</AlertTitle>
+                    <Alert variant={invalidImageAlert.isPartial ? "warning" : "destructive"} className="mb-4">
+                      {invalidImageAlert.isPartial ? (
+                        <AlertTriangle className="h-4 w-4" />
+                      ) : (
+                        <Ban className="h-4 w-4" />
+                      )}
+                      <AlertTitle>
+                        {invalidImageAlert.isPartial 
+                          ? t('partialCurrencyNote') 
+                          : t('invalidImage')
+                        }
+                      </AlertTitle>
+                      <AlertDescription className="space-y-2">
+                        <p>
+                          {invalidImageAlert.isPartial 
+                            ? t('partialCurrencyDescription')
+                            : t('notCurrencyNote')
+                          }
+                        </p>
+                        
+                        {invalidImageAlert.detectedFeatures && invalidImageAlert.detectedFeatures.length > 0 && (
+                          <div className="text-sm mt-2">
+                            <p><strong>{t('detectedFeatures')}:</strong> {invalidImageAlert.detectedFeatures.join(', ')}</p>
+                          </div>
+                        )}
+                        
+                        <div className="mt-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mr-2"
+                            onClick={() => {
+                              fileInputRef.current?.click();
+                            }}
+                          >
+                            {t('tryDifferentImage')}
+                          </Button>
+                          
+                          <Button 
+                            variant="default" 
+                            size="sm"
+                            onClick={() => {
+                              setProceedAnyway(true);
+                              setInvalidImageAlert({ show: false });
+                            }}
+                          >
+                            <FileCog className="mr-1 h-4 w-4" />
+                            {t('proceedAnyway')}
+                          </Button>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {proceedAnyway && (
+                    <Alert variant="warning" className="mb-4">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTitle>{t('proceedingAnyway')}</AlertTitle>
                       <AlertDescription>
-                        {t('notCurrencyNote')}
+                        {t('proceedingAnywayDescription')}
                       </AlertDescription>
                     </Alert>
                   )}
@@ -463,11 +626,66 @@ const CurrencyAuthenticator = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {invalidImageAlert.show && (
-                    <Alert variant="destructive" className="mb-4">
-                      <Ban className="h-4 w-4" />
-                      <AlertTitle>{t('invalidImage')}</AlertTitle>
+                    <Alert variant={invalidImageAlert.isPartial ? "warning" : "destructive"} className="mb-4">
+                      {invalidImageAlert.isPartial ? (
+                        <AlertTriangle className="h-4 w-4" />
+                      ) : (
+                        <Ban className="h-4 w-4" />
+                      )}
+                      <AlertTitle>
+                        {invalidImageAlert.isPartial 
+                          ? t('partialCurrencyNote') 
+                          : t('invalidImage')
+                        }
+                      </AlertTitle>
+                      <AlertDescription className="space-y-2">
+                        <p>
+                          {invalidImageAlert.isPartial 
+                            ? t('partialCurrencyDescription')
+                            : t('notCurrencyNote')
+                          }
+                        </p>
+                        
+                        {invalidImageAlert.detectedFeatures && invalidImageAlert.detectedFeatures.length > 0 && (
+                          <div className="text-sm mt-2">
+                            <p><strong>{t('detectedFeatures')}:</strong> {invalidImageAlert.detectedFeatures.join(', ')}</p>
+                          </div>
+                        )}
+                        
+                        <div className="mt-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mr-2"
+                            onClick={() => {
+                              resetCamera();
+                            }}
+                          >
+                            {t('retakePhoto')}
+                          </Button>
+                          
+                          <Button 
+                            variant="default" 
+                            size="sm"
+                            onClick={() => {
+                              setProceedAnyway(true);
+                              setInvalidImageAlert({ show: false });
+                            }}
+                          >
+                            <FileCog className="mr-1 h-4 w-4" />
+                            {t('proceedAnyway')}
+                          </Button>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {proceedAnyway && (
+                    <Alert variant="warning" className="mb-4">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTitle>{t('proceedingAnyway')}</AlertTitle>
                       <AlertDescription>
-                        {t('notCurrencyNote')}
+                        {t('proceedingAnywayDescription')}
                       </AlertDescription>
                     </Alert>
                   )}

@@ -10,6 +10,7 @@ const CurrencyAuth = () => {
   
   useEffect(() => {
     console.log('CurrencyAuth page loaded with language function:', !!t);
+    document.title = t('currencyAuthTitle') || 'Currency Authentication';
     
     // Setup fade-in animations when components come into view
     const observer = setupFadeInObserver();
